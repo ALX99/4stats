@@ -1,0 +1,37 @@
+version: 3
+
+vars:
+  COMMIT_HASH: { sh: git log -n1 --format=%h }
+  DATE: '{{now | date "2006-01-02T15:04:05Z07:00"}}'
+
+tasks:
+  clean:
+    - rm -rf ./build
+
+  build:
+    sources:
+      - ./internal/**/*.go
+      - ./cmd/**/*.go
+      - ./go.mod
+    generates:
+      - ./build/yonsuu
+    cmds:
+      - CGO_ENABLED=0 go build -v -trimpath -ldflags "-s -w -X 'main.commitHash={{.COMMIT_HASH}}' -X 'main.compilationDate={{.DATE}}'" -o ./build/yonsuu ./cmd/yonsuu/main.go
+
+  image:
+    deps:
+      - task: build
+    cmds:
+      - task: docker-build
+        vars:
+          DOCKER_IMAGE: alx99/priv:botpot
+
+  docker-build:
+    label: image {{.DOCKER_IMAGE}}
+    internal: true
+    run: when_changed
+    cmds:
+      - cd {{.DIR}} && docker build --file {{.DOCKER_FILE}} -t {{.DOCKER_IMAGE}} .
+    vars:
+      DOCKER_FILE: '{{default "Dockerfile" .DOCKER_FILE}}'
+      DIR: '{{default "." .DIR}}'
