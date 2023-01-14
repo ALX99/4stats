@@ -7,6 +7,7 @@ vars:
 tasks:
   clean:
     - rm -rf ./build
+    - docker-compose down -v
 
   build:
     sources:
@@ -19,12 +20,21 @@ tasks:
       - CGO_ENABLED=0 go build -v -trimpath -ldflags "-s -w -X 'main.commitHash={{.COMMIT_HASH}}' -X 'main.compilationDate={{.DATE}}'" -o ./build/yonsuu ./cmd/yonsuu/main.go
 
   image:
-    deps:
-      - task: build
+    deps: [build]
     cmds:
       - task: docker-build
         vars:
           DOCKER_IMAGE: alx99/priv:botpot
+
+  start:
+    deps: [image]
+    cmds:
+      - docker-compose up -d
+
+  stop:
+    cmds:
+      - docker-compose stop
+
 
   docker-build:
     label: image {{.DOCKER_IMAGE}}
