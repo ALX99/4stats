@@ -15,3 +15,10 @@ services:
       - '--config.file=/etc/prometheus/prometheus.yml'
     ports:
       - 9090:9090
+
+  yonsuu:
+    container_name: yonsuu
+    hostname: prometheusprometheus
+    image: alx99/todo:latest
+    ports:
+      - 8000:8000

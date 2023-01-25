@@ -25,7 +25,7 @@ tasks:
     cmds:
       - task: common:docker-build
         vars:
-          DOCKER_IMAGE: alx99/todo:todo
+          DOCKER_IMAGE: alx99/todo:latest
 
   start:
     deps: [image]
