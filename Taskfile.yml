@@ -1,8 +1,9 @@
 version: 3
 
-vars:
-  COMMIT_HASH: { sh: git log -n1 --format=%h }
-  DATE: '{{now | date "2006-01-02T15:04:05Z07:00"}}'
+includes:
+  common:
+    taskfile: ./task/Taskfile.yml
+    internal: true
 
 tasks:
   clean:
@@ -22,9 +23,9 @@ tasks:
   image:
     deps: [build]
     cmds:
-      - task: docker-build
+      - task: common:docker-build
         vars:
-          DOCKER_IMAGE: alx99/priv:botpot
+          DOCKER_IMAGE: alx99/todo:todo
 
   start:
     deps: [image]
@@ -34,14 +35,3 @@ tasks:
   stop:
     cmds:
       - docker-compose stop
-
-
-  docker-build:
-    label: image {{.DOCKER_IMAGE}}
-    internal: true
-    run: when_changed
-    cmds:
-      - cd {{.DIR}} && docker build --file {{.DOCKER_FILE}} -t {{.DOCKER_IMAGE}} .
-    vars:
-      DOCKER_FILE: '{{default "Dockerfile" .DOCKER_FILE}}'
-      DIR: '{{default "." .DIR}}'
