@@ -12,15 +12,15 @@ import (
 )
 
 type Board struct {
-	name   string
-	apiURL string
+	name          string
+	apiThreadList string
 
 	running atomic.Bool
 	stop    chan any
 	sync.WaitGroup
 }
 
-type boardThreads []struct {
+type threadList []struct {
 	Page    int `json:"page"`
 	Threads []struct {
 		No           int `json:"no"`
@@ -31,8 +31,8 @@ type boardThreads []struct {
 
 func New(name string) Board {
 	return Board{
-		name:   name,
-		apiURL: fmt.Sprintf("https://a.4cdn.org/%s/catalog.json", name),
+		name:          name,
+		apiThreadList: fmt.Sprintf("https://a.4cdn.org/%s/threads.json", name),
 	}
 }
 
@@ -50,11 +50,11 @@ func (b *Board) StartWatch() error {
 		defer b.Done()
 		defer ticker.Stop()
 
-		for {
-			if err := b.refresh(); err != nil {
-				fmt.Println(err)
-			}
+		if err := b.refresh(); err != nil {
+			fmt.Println(err)
+		}
 
+		for {
 			ticker.Reset(delay)
 			select {
 			case <-ticker.C:
@@ -73,25 +73,33 @@ func (b *Board) StartWatch() error {
 
 // refresh calls the API and refreshes the statistics
 func (b *Board) refresh() error {
-	resp, err := http.Get(b.apiURL)
+	tList, err := b.getThreadList()
 	if err != nil {
 		return err
+	}
+
+	fmt.Printf("%+v", tList)
+	return nil
+}
+
+func (b *Board) getThreadList() (threadList, error) {
+	resp, err := http.Get(b.apiThreadList)
+	if err != nil {
+		return threadList{}, nil
 	}
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return err
+		return threadList{}, nil
 	}
 	resp.Body.Close()
 
-	threads := boardThreads{}
-	if err = json.Unmarshal(body, &threads); err != nil {
-		return err
+	tList := threadList{}
+	if err = json.Unmarshal(body, &tList); err != nil {
+		return threadList{}, nil
 	}
 
-	fmt.Printf("%+v", threads)
-
-	return nil
+	return tList, nil
 }
 
 func (b *Board) StopWatch() {
