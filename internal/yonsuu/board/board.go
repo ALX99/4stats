@@ -2,14 +2,11 @@ package board
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
 	"log"
 	"net/http"
 	"net/url"
-	"sync"
-	"sync/atomic"
 	"time"
 
 	"github.com/alx99/yonsuu/internal/yonsuu/metrics"
@@ -23,9 +20,6 @@ type Board struct {
 
 	m       metrics.Metrics
 	client  http.Client
-	running atomic.Bool
-	stop    chan any
-	sync.WaitGroup
 }
 
 type threadList []struct {
@@ -75,43 +69,8 @@ func New(name string, m metrics.Metrics) Board {
 	}
 }
 
-func (b *Board) StartWatch() error {
-	b.stop = make(chan any)
-	b.Add(1)
-	delay := 10 * time.Second
-
-	if b.running.Swap(true) {
-		return errors.New("board is already running")
-	}
-
-	go func() {
-		ticker := time.NewTicker(delay)
-		defer b.Done()
-		defer ticker.Stop()
-
-		if err := b.refresh(); err != nil {
-			log.Fatalln(err)
-		}
-
-		for {
-			ticker.Reset(delay)
-			select {
-			case <-ticker.C:
-				if err := b.refresh(); err != nil {
-					log.Fatalln(err)
-				}
-
-			case <-b.stop:
-				return
-			}
-		}
-	}()
-
-	return nil
-}
-
-// refresh calls the API and refreshes the statistics
-func (b *Board) refresh() error {
+// Update this board's metrics
+func (b *Board) Update() error {
 	ppm, err := b.calculatePPM()
 	if err != nil {
 		return err
@@ -204,9 +163,4 @@ func (b *Board) getIndexPage(page uint8) (indexPage, error) {
 	}
 
 	return iPage, nil
-}
-
-func (b *Board) StopWatch() {
-	close(b.stop)
-	b.Wait()
 }
