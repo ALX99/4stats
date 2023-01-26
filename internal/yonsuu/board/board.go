@@ -11,6 +11,8 @@ import (
 	"sync"
 	"sync/atomic"
 	"time"
+
+	"github.com/alx99/yonsuu/internal/yonsuu/metrics"
 )
 
 type Board struct {
@@ -19,6 +21,7 @@ type Board struct {
 	prevFirstPage       indexPage
 	prevFirstPageScrape time.Time
 
+	m       metrics.Metrics
 	running atomic.Bool
 	stop    chan any
 	sync.WaitGroup
@@ -60,9 +63,10 @@ type indexPage struct {
 	} `json:"threads"`
 }
 
-func New(name string) Board {
+func New(name string, m metrics.Metrics) Board {
 	return Board{
 		name: name,
+		m:    m,
 	}
 }
 
@@ -108,6 +112,7 @@ func (b *Board) refresh() error {
 		return err
 	}
 
+	b.m.SetPPM(b.name, ppm)
 	log.Println("ppm:", ppm)
 
 	return nil

@@ -16,7 +16,11 @@ func main() {
 		log.Fatalln(err)
 	}
 
-	b := board.New("g")
+	if err := m.InitializeMetrics(); err != nil {
+		log.Fatalln(err)
+	}
+
+	b := board.New("g", m)
 	if err := b.StartWatch(); err != nil {
 		log.Fatalln(err)
 	}
