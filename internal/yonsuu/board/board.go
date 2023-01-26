@@ -22,6 +22,7 @@ type Board struct {
 	prevFirstPageScrape time.Time
 
 	m       metrics.Metrics
+	client  http.Client
 	running atomic.Bool
 	stop    chan any
 	sync.WaitGroup
@@ -67,6 +68,10 @@ func New(name string, m metrics.Metrics) Board {
 	return Board{
 		name: name,
 		m:    m,
+		client: http.Client{
+			Transport: http.DefaultTransport,
+			Timeout:   10 * time.Second,
+		},
 	}
 }
 
@@ -146,10 +151,16 @@ func (b *Board) getThreadList() (threadList, error) {
 		return threadList{}, nil
 	}
 
-	resp, err := http.Get(url)
+	r, err := http.NewRequest(http.MethodGet, url, nil)
 	if err != nil {
 		return threadList{}, nil
 	}
+
+	resp, err := b.client.Do(r)
+	if err != nil {
+		return threadList{}, nil
+	}
+	defer resp.Body.Close()
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
@@ -171,16 +182,21 @@ func (b *Board) getIndexPage(page uint8) (indexPage, error) {
 		return indexPage{}, nil
 	}
 
-	resp, err := http.Get(url)
+	r, err := http.NewRequest(http.MethodGet, url, nil)
 	if err != nil {
 		return indexPage{}, nil
 	}
+
+	resp, err := b.client.Do(r)
+	if err != nil {
+		return indexPage{}, nil
+	}
+	defer resp.Body.Close()
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return indexPage{}, nil
 	}
-	resp.Body.Close()
 
 	iPage := indexPage{}
 	if err = json.Unmarshal(body, &iPage); err != nil {
