@@ -16,7 +16,7 @@ func main() {
 		log.Fatalln(err)
 	}
 
-	b := board.New("po")
+	b := board.New("g")
 	if err := b.StartWatch(); err != nil {
 		log.Fatalln(err)
 	}
