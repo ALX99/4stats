@@ -2,6 +2,7 @@ version: '3'
 
 volumes:
   prometheus_data: {}
+  grafana-data: {}
 
 services:
   prometheus:
@@ -14,7 +15,18 @@ services:
     command:
       - '--config.file=/etc/prometheus/prometheus.yml'
     ports:
-      - 9090:9090
+      - 127.0.0.1:9090:9090
+    depends_on: [yonsuu]
+
+  grafana:
+    image: grafana/grafana-oss
+    restart: unless-stopped
+    ports:
+      - "80:3000"
+    volumes:
+      - ./grafana/datasources:/etc/grafana/provisioning/datasources
+      - ./grafana/dashboards:/etc/grafana/provisioning/dashboards
+      - grafana-data:/var/lib/grafana
 
   yonsuu:
     container_name: yonsuu
