@@ -1,6 +1,7 @@
 package board
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -34,7 +35,7 @@ type threadList []struct {
 type indexPage struct {
 	Threads []struct {
 		Posts []struct {
-			No          int64 `json:"no"`
+			No          int64  `json:"no"`
 			Now         string `json:"now"`
 			Name        string `json:"name"`
 			Com         string `json:"com"`
@@ -70,8 +71,8 @@ func New(name string, m metrics.Metrics) Board {
 }
 
 // Update this board's metrics
-func (b *Board) Update() error {
-	ppm, err := b.calculatePPM()
+func (b *Board) Update(ctx context.Context) error {
+	ppm, err := b.calculatePPM(ctx)
 	if err != nil {
 		return err
 	}
@@ -82,12 +83,12 @@ func (b *Board) Update() error {
 	return nil
 }
 
-func (b *Board) calculatePPM() (float64, error) {
+func (b *Board) calculatePPM(ctx context.Context) (float64, error) {
 	// save last valuse
 	prevScrape := b.prevFirstPageScrape
 	prevFirstIndexPage := b.prevFirstPage
 
-	firstPage, err := b.getIndexPage(1)
+	firstPage, err := b.getIndexPage(ctx, 1)
 	if err != nil {
 		return 0, err
 	}
@@ -135,13 +136,13 @@ func (b *Board) getThreadList() (threadList, error) {
 	return tList, nil
 }
 
-func (b *Board) getIndexPage(page uint8) (indexPage, error) {
+func (b *Board) getIndexPage(ctx context.Context, page uint8) (indexPage, error) {
 	url, err := url.JoinPath("https://a.4cdn.org", b.name, fmt.Sprintf("%d.json", page))
 	if err != nil {
 		return indexPage{}, err
 	}
 
-	r, err := http.NewRequest(http.MethodGet, url, nil)
+	r, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
 	if err != nil {
 		return indexPage{}, err
 	}

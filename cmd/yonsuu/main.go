@@ -45,8 +45,8 @@ func main() {
 		select {
 		case <-ticker.C:
 			for i := 0; i < len(bs); i++ {
-				if err := bs[i].Update(); err != nil {
-					log.Fatalln(err)
+				if err := bs[i].Update(ctx); err != nil {
+					log.Println(err)
 				}
 				time.Sleep(2 * time.Second)
 			}
