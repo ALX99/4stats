@@ -34,7 +34,7 @@ type threadList []struct {
 type indexPage struct {
 	Threads []struct {
 		Posts []struct {
-			No          int    `json:"no"`
+			No          int64 `json:"no"`
 			Now         string `json:"now"`
 			Name        string `json:"name"`
 			Com         string `json:"com"`
