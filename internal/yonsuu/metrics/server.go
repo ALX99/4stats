@@ -29,9 +29,9 @@ func New() *Server {
 func (s *Server) InitializeMetrics() error {
 	s.ppm = prometheus.NewGaugeVec(
 		prometheus.GaugeOpts{
-			Namespace: "yonsuu",
+			Namespace: "fourchan",
 			Subsystem: "posts",
-			Name:      "ppm",
+			Name:      "per_minute",
 			Help:      "Number of posts per minute",
 		},
 		[]string{"board"},
