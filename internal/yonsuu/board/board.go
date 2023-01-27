@@ -18,8 +18,8 @@ type Board struct {
 	prevFirstPage       indexPage
 	prevFirstPageScrape time.Time
 
-	m       metrics.Metrics
-	client  http.Client
+	m      metrics.Metrics
+	client http.Client
 }
 
 type threadList []struct {

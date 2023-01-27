@@ -21,14 +21,20 @@ func main() {
 		log.Fatalln(err)
 	}
 
-	b := board.New("g", m)
+	boards, err := board.GetBoards()
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	bs := make([]board.Board, 0, len(boards.Boards))
+	for _, b := range boards.Boards {
+		if b.Board != "vg" { // todo something not working with /vg/
+			bs = append(bs, board.New(b.Board, m))
+		}
+	}
 
 	ctx, cancel := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
 	defer cancel()
-
-	if err := b.Update(); err != nil {
-		log.Fatalln(err)
-	}
 
 	delay := 10 * time.Second
 	ticker := time.NewTicker(delay)
@@ -38,8 +44,11 @@ func main() {
 		ticker.Reset(delay)
 		select {
 		case <-ticker.C:
-			if err := b.Update(); err != nil {
-				log.Fatalln(err)
+			for i := 0; i < len(bs); i++ {
+				if err := bs[i].Update(); err != nil {
+					log.Fatalln(err)
+				}
+				time.Sleep(2 * time.Second)
 			}
 
 		case <-ctx.Done():
