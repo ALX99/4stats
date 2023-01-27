@@ -88,7 +88,7 @@ func (b *Board) calculatePPM(ctx context.Context) (float64, error) {
 	prevScrape := b.prevFirstPageScrape
 	prevFirstIndexPage := b.prevFirstPage
 
-	firstPage, err := b.getIndexPage(ctx, 1)
+	firstPage, err := b.getFirstIndexPage(ctx)
 	if err != nil {
 		return 0, err
 	}
@@ -136,7 +136,8 @@ func (b *Board) getThreadList() (threadList, error) {
 	return tList, nil
 }
 
-func (b *Board) getIndexPage(ctx context.Context, page uint8) (indexPage, error) {
+func (b *Board) getFirstIndexPage(ctx context.Context) (indexPage, error) {
+	page := 1
 	url, err := url.JoinPath("https://a.4cdn.org", b.name, fmt.Sprintf("%d.json", page))
 	if err != nil {
 		return indexPage{}, err
@@ -146,12 +147,23 @@ func (b *Board) getIndexPage(ctx context.Context, page uint8) (indexPage, error)
 	if err != nil {
 		return indexPage{}, err
 	}
+	if !b.prevFirstPageScrape.IsZero() {
+		r.Header.Set("If-Modified-Since", b.prevFirstPageScrape.Format(time.RFC1123))
+	}
 
 	resp, err := b.client.Do(r)
 	if err != nil {
 		return indexPage{}, err
 	}
 	defer resp.Body.Close()
+
+	if resp.StatusCode == http.StatusNotModified {
+		return b.prevFirstPage, nil
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		return indexPage{}, fmt.Errorf("got %d statuscode", resp.StatusCode)
+	}
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
