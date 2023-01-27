@@ -107,29 +107,29 @@ func (b *Board) calculatePPM() (float64, error) {
 func (b *Board) getThreadList() (threadList, error) {
 	url, err := url.JoinPath("https://a.4cdn.org", b.name, "threads.json")
 	if err != nil {
-		return threadList{}, nil
+		return threadList{}, err
 	}
 
 	r, err := http.NewRequest(http.MethodGet, url, nil)
 	if err != nil {
-		return threadList{}, nil
+		return threadList{}, err
 	}
 
 	resp, err := b.client.Do(r)
 	if err != nil {
-		return threadList{}, nil
+		return threadList{}, err
 	}
 	defer resp.Body.Close()
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return threadList{}, nil
+		return threadList{}, err
 	}
 	resp.Body.Close()
 
 	tList := threadList{}
 	if err = json.Unmarshal(body, &tList); err != nil {
-		return threadList{}, nil
+		return threadList{}, err
 	}
 
 	return tList, nil
@@ -138,28 +138,28 @@ func (b *Board) getThreadList() (threadList, error) {
 func (b *Board) getIndexPage(page uint8) (indexPage, error) {
 	url, err := url.JoinPath("https://a.4cdn.org", b.name, fmt.Sprintf("%d.json", page))
 	if err != nil {
-		return indexPage{}, nil
+		return indexPage{}, err
 	}
 
 	r, err := http.NewRequest(http.MethodGet, url, nil)
 	if err != nil {
-		return indexPage{}, nil
+		return indexPage{}, err
 	}
 
 	resp, err := b.client.Do(r)
 	if err != nil {
-		return indexPage{}, nil
+		return indexPage{}, err
 	}
 	defer resp.Body.Close()
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return indexPage{}, nil
+		return indexPage{}, err
 	}
 
 	iPage := indexPage{}
 	if err = json.Unmarshal(body, &iPage); err != nil {
-		return indexPage{}, nil
+		return indexPage{}, err
 	}
 
 	return iPage, nil
