@@ -48,7 +48,7 @@ func main() {
 				if err := bs[i].Update(ctx); err != nil {
 					log.Println(err)
 				}
-				time.Sleep(2 * time.Second)
+				time.Sleep(time.Second)
 			}
 
 		case <-ctx.Done():
