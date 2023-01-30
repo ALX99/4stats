@@ -1,5 +1,5 @@
 FROM gcr.io/distroless/static-debian11
 
-COPY  ./build/yonsuu /yonsuu
+COPY  ./build/4stats /4stats
 
-CMD ["/yonsuu"]
+CMD ["/4stats"]

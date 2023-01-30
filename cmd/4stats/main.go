@@ -11,8 +11,8 @@ import (
 
 	"github.com/rs/zerolog/log"
 
-	"github.com/alx99/yonsuu/internal/yonsuu/board"
-	"github.com/alx99/yonsuu/internal/yonsuu/metrics"
+	"github.com/alx99/4stats/internal/4stats/board"
+	"github.com/alx99/4stats/internal/4stats/metrics"
 	"github.com/rs/zerolog"
 )
 

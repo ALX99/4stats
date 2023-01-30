@@ -16,16 +16,16 @@ tasks:
       - ./cmd/**/*.go
       - ./go.mod
     generates:
-      - ./build/yonsuu
+      - ./build/4stats
     cmds:
-      - CGO_ENABLED=0 go build -v -trimpath -ldflags "-s -w -X 'main.commitHash={{.COMMIT_HASH}}' -X 'main.compilationDate={{.DATE}}'" -o ./build/yonsuu ./cmd/yonsuu/main.go
+      - CGO_ENABLED=0 go build -v -trimpath -ldflags "-s -w -X 'main.commitHash={{.COMMIT_HASH}}' -X 'main.compilationDate={{.DATE}}'" -o ./build/4stats ./cmd/4stats/main.go
 
   image:
     deps: [build]
     cmds:
       - task: common:docker-build
         vars:
-          DOCKER_IMAGE: alx99/todo:latest
+          DOCKER_IMAGE: alx99/4stats:latest
 
   start:
     deps: [image]

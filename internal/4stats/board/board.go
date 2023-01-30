@@ -8,7 +8,7 @@ import (
 	"net/url"
 	"time"
 
-	"github.com/alx99/yonsuu/internal/yonsuu/metrics"
+	"github.com/alx99/4stats/internal/4stats/metrics"
 )
 
 type Board struct {

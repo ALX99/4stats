@@ -16,7 +16,7 @@ services:
       - '--config.file=/etc/prometheus/prometheus.yml'
     ports:
       - 127.0.0.1:9090:9090
-    depends_on: [yonsuu]
+    depends_on: [4stats]
 
   grafana:
     image: grafana/grafana-oss
@@ -28,9 +28,9 @@ services:
       - ./grafana/dashboards:/etc/grafana/provisioning/dashboards
       - grafana-data:/var/lib/grafana
 
-  yonsuu:
-    container_name: yonsuu
+  4stats:
+    container_name: 4stats
     hostname: prometheusprometheus
-    image: alx99/todo:latest
+    image: alx99/4stats:latest
     ports:
       - 8000:8000

@@ -1,4 +1,4 @@
-module github.com/alx99/yonsuu
+module github.com/alx99/4stats
 
 go 1.19
 
