@@ -43,12 +43,11 @@ func main() {
 	ctx, cancel := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
 	defer cancel()
 
-	delay := 10 * time.Second
+	delay := time.Second
 	ticker := time.NewTicker(delay)
 	defer ticker.Stop()
 
 	for {
-		ticker.Reset(delay)
 		select {
 		case <-ticker.C:
 			for i := 0; i < len(bs); i++ {
@@ -56,7 +55,7 @@ func main() {
 				if err := bs[i].Update(ctx); err != nil {
 					log.Err(err).Msgf("Failed to update board %s", bs[i].Name())
 				}
-				time.Sleep(time.Second)
+				time.Sleep(delay)
 			}
 
 		case <-ctx.Done():
