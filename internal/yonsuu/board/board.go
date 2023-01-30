@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"log"
 	"net/http"
 	"net/url"
 	"time"
@@ -78,7 +77,6 @@ func (b *Board) Update(ctx context.Context) error {
 	}
 
 	b.m.SetPPM(b.name, ppm)
-	log.Println("ppm:", ppm)
 
 	return nil
 }
@@ -176,4 +174,8 @@ func (b *Board) getFirstIndexPage(ctx context.Context) (indexPage, error) {
 	}
 
 	return iPage, nil
+}
+
+func (b *Board) Name() string {
+	return b.name
 }
