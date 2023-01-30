@@ -3,7 +3,6 @@ package board
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"io"
 	"net/http"
 	"net/url"
@@ -28,33 +27,6 @@ type threadList []struct {
 		No           int `json:"no"`
 		LastModified int `json:"last_modified"`
 		Replies      int `json:"replies"`
-	} `json:"threads"`
-}
-
-type indexPage struct {
-	Threads []struct {
-		Posts []struct {
-			No          int64  `json:"no"`
-			Now         string `json:"now"`
-			Name        string `json:"name"`
-			Com         string `json:"com"`
-			Filename    string `json:"filename,omitempty"`
-			Ext         string `json:"ext,omitempty"`
-			W           int    `json:"w,omitempty"`
-			H           int    `json:"h,omitempty"`
-			TnW         int    `json:"tn_w,omitempty"`
-			TnH         int    `json:"tn_h,omitempty"`
-			Tim         int64  `json:"tim,omitempty"`
-			Time        int    `json:"time"`
-			Md5         string `json:"md5,omitempty"`
-			Fsize       int    `json:"fsize,omitempty"`
-			Resto       int    `json:"resto"`
-			Bumplimit   int    `json:"bumplimit,omitempty"`
-			Imagelimit  int    `json:"imagelimit,omitempty"`
-			SemanticURL string `json:"semantic_url,omitempty"`
-			Replies     int    `json:"replies,omitempty"`
-			Images      int    `json:"images,omitempty"`
-		} `json:"posts"`
 	} `json:"threads"`
 }
 
@@ -135,45 +107,14 @@ func (b *Board) getThreadList() (threadList, error) {
 }
 
 func (b *Board) getFirstIndexPage(ctx context.Context) (indexPage, error) {
-	page := 1
-	url, err := url.JoinPath("https://a.4cdn.org", b.name, fmt.Sprintf("%d.json", page))
+	page, modified, err := getIndexPage(ctx, &b.client, b.name, 1, b.prevFirstPageScrape)
 	if err != nil {
 		return indexPage{}, err
 	}
-
-	r, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
-	if err != nil {
-		return indexPage{}, err
-	}
-	if !b.prevFirstPageScrape.IsZero() {
-		r.Header.Set("If-Modified-Since", b.prevFirstPageScrape.Format(time.RFC1123))
-	}
-
-	resp, err := b.client.Do(r)
-	if err != nil {
-		return indexPage{}, err
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode == http.StatusNotModified {
+	if !modified {
 		return b.prevFirstPage, nil
 	}
-
-	if resp.StatusCode != http.StatusOK {
-		return indexPage{}, fmt.Errorf("got %d statuscode", resp.StatusCode)
-	}
-
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return indexPage{}, err
-	}
-
-	iPage := indexPage{}
-	if err = json.Unmarshal(body, &iPage); err != nil {
-		return indexPage{}, err
-	}
-
-	return iPage, nil
+	return page, nil
 }
 
 func (b *Board) Name() string {
