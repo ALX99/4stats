@@ -27,6 +27,11 @@ tasks:
         vars:
           DOCKER_IMAGE: alx99/4stats:latest
 
+  image-push:
+    deps: [image]
+    cmds:
+      - docker push alx99/4stats:latest
+
   start:
     deps: [image]
     cmds:
