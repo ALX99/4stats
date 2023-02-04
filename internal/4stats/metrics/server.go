@@ -51,7 +51,6 @@ func (s *Server) Start() error {
 }
 
 func (s *Server) SetPPM(board string, v float64) {
-	s.ppm.WithLabelValues(board).Set(v)
 	gauge, err := s.ppm.GetMetricWithLabelValues(board)
 	if err != nil {
 		log.Println(err)
