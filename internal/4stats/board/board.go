@@ -59,7 +59,7 @@ func (b *Board) Update(ctx context.Context) error {
 func (b *Board) calculatePPM(ctx context.Context) (float64, error) {
 	// save last valuse
 	prevScrape := b.prevCatalogScrape
-	prevFirstIndexPage := b.prevCatalog
+	prevCatalog := b.prevCatalog
 
 	c, err := b.getCatalog(ctx)
 	if err != nil {
@@ -74,7 +74,7 @@ func (b *Board) calculatePPM(ctx context.Context) (float64, error) {
 		return 0, nil // first scrape nothing to calculate
 	}
 
-	newPostsCount := getHighestPostNo(c) - getHighestPostNo(prevFirstIndexPage)
+	newPostsCount := getHighestPostNo(c) - getHighestPostNo(prevCatalog)
 
 	return (float64(newPostsCount) / time.Since(prevScrape).Seconds()) * 60, nil
 }
