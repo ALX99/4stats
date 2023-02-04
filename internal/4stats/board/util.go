@@ -16,3 +16,13 @@ func getHighestPostNo(c catalog) int64 {
 	}
 	return maxNo
 }
+
+func getTotalPostCount(c catalog) int64 {
+	var count int64
+	for _, page := range c {
+		for _, thread := range page.Threads {
+			count += int64(thread.Replies) + 1
+		}
+	}
+	return count
+}

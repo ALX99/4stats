@@ -12,7 +12,8 @@ type Server struct {
 	server *http.Server
 
 	// metrics
-	ppm *prometheus.GaugeVec
+	ppm   *prometheus.GaugeVec
+	posts *prometheus.GaugeVec
 }
 
 func New() *Server {
@@ -27,6 +28,7 @@ func New() *Server {
 }
 
 func (s *Server) InitializeMetrics() error {
+	labels := []string{"board"}
 	s.ppm = prometheus.NewGaugeVec(
 		prometheus.GaugeOpts{
 			Namespace: "fourchan",
@@ -34,10 +36,24 @@ func (s *Server) InitializeMetrics() error {
 			Name:      "per_minute",
 			Help:      "Number of posts per minute",
 		},
-		[]string{"board"},
+		labels,
 	)
 
-	return prometheus.Register(s.ppm)
+	s.posts = prometheus.NewGaugeVec(
+		prometheus.GaugeOpts{
+			Namespace: "fourchan",
+			Subsystem: "posts",
+			Name:      "total",
+			Help:      "Total number of posts",
+		},
+		labels,
+	)
+
+	if err := prometheus.Register(s.ppm); err != nil {
+		return err
+	}
+
+	return prometheus.Register(s.posts)
 }
 
 func (s *Server) Start() error {
@@ -52,6 +68,14 @@ func (s *Server) Start() error {
 
 func (s *Server) SetPPM(board string, v float64) {
 	gauge, err := s.ppm.GetMetricWithLabelValues(board)
+	if err != nil {
+		log.Println(err)
+	}
+	gauge.Set(v)
+}
+
+func (s *Server) SetPostCount(board string, v float64) {
+	gauge, err := s.posts.GetMetricWithLabelValues(board)
 	if err != nil {
 		log.Println(err)
 	}

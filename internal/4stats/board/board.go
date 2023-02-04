@@ -43,15 +43,18 @@ func New(name string, m metrics.Metrics) Board {
 
 // Update this board's metrics
 func (b *Board) Update(ctx context.Context) error {
+	ppm, err := b.calculatePPM(ctx)
+	if err != nil {
+		return err
+	}
+
 	// todo /vg/ not working due to last_replies not
 	// being populated
 	if b.name != "vg" {
-		ppm, err := b.calculatePPM(ctx)
-		if err != nil {
-			return err
-		}
 		b.m.SetPPM(b.name, ppm)
 	}
+
+	b.m.SetPostCount(b.name, float64(getTotalPostCount(b.prevCatalog)))
 
 	return nil
 }
