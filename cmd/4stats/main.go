@@ -35,9 +35,7 @@ func main() {
 
 	bs := make([]board.Board, 0, len(boards.Boards))
 	for _, b := range boards.Boards {
-		if b.Board != "vg" { // todo something not working with /vg/
-			bs = append(bs, board.New(b.Board, m))
-		}
+		bs = append(bs, board.New(b.Board, m))
 	}
 
 	ctx, cancel := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
@@ -51,7 +49,6 @@ func main() {
 		select {
 		case <-ticker.C:
 			for i := 0; i < len(bs); i++ {
-				log.Debug().Msgf("Updating board %s", bs[i].Name())
 				if err := bs[i].Update(ctx); err != nil {
 					log.Err(err).Msgf("Failed to update board %s", bs[i].Name())
 				}

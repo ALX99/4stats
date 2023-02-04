@@ -1,11 +1,16 @@
 package board
 
-func getHighestPostNo(page indexPage) int64 {
+func getHighestPostNo(c catalog) int64 {
 	var maxNo int64
-	for _, threads := range page.Threads {
-		for _, post := range threads.Posts {
-			if maxNo < post.No {
-				maxNo = post.No
+	for _, page := range c {
+		for _, thread := range page.Threads {
+			if maxNo < thread.No {
+				maxNo = thread.No
+			}
+			for _, reply := range thread.LastReplies {
+				if maxNo < reply.No {
+					maxNo = reply.No
+				}
 			}
 		}
 	}

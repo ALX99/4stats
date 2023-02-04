@@ -14,8 +14,8 @@ import (
 type Board struct {
 	name string
 
-	prevFirstPage       indexPage
-	prevFirstPageScrape time.Time
+	prevCatalog       catalog
+	prevCatalogScrape time.Time
 
 	m      metrics.Metrics
 	client http.Client
@@ -43,35 +43,39 @@ func New(name string, m metrics.Metrics) Board {
 
 // Update this board's metrics
 func (b *Board) Update(ctx context.Context) error {
-	ppm, err := b.calculatePPM(ctx)
-	if err != nil {
-		return err
+	// todo /vg/ not working due to last_replies not
+	// being populated
+	if b.name != "vg" {
+		ppm, err := b.calculatePPM(ctx)
+		if err != nil {
+			return err
+		}
+		b.m.SetPPM(b.name, ppm)
 	}
-
-	b.m.SetPPM(b.name, ppm)
 
 	return nil
 }
 
 func (b *Board) calculatePPM(ctx context.Context) (float64, error) {
 	// save last valuse
-	prevScrape := b.prevFirstPageScrape
-	prevFirstIndexPage := b.prevFirstPage
+	prevScrape := b.prevCatalogScrape
+	prevFirstIndexPage := b.prevCatalog
 
-	firstPage, err := b.getFirstIndexPage(ctx)
+	c, err := b.getCatalog(ctx)
 	if err != nil {
 		return 0, err
 	}
 
 	// save new ones
-	b.prevFirstPageScrape = time.Now()
-	b.prevFirstPage = firstPage
+	b.prevCatalogScrape = time.Now()
+	b.prevCatalog = c
 
 	if prevScrape.IsZero() {
 		return 0, nil // first scrape nothing to calculate
 	}
 
-	newPostsCount := getHighestPostNo(firstPage) - getHighestPostNo(prevFirstIndexPage)
+	newPostsCount := getHighestPostNo(c) - getHighestPostNo(prevFirstIndexPage)
+
 	return (float64(newPostsCount) / time.Since(prevScrape).Seconds()) * 60, nil
 }
 
@@ -106,13 +110,13 @@ func (b *Board) getThreadList() (threadList, error) {
 	return tList, nil
 }
 
-func (b *Board) getFirstIndexPage(ctx context.Context) (indexPage, error) {
-	page, modified, err := getIndexPage(ctx, &b.client, b.name, 1, b.prevFirstPageScrape)
+func (b *Board) getCatalog(ctx context.Context) (catalog, error) {
+	page, modified, err := getCatalog(ctx, &b.client, b.name, b.prevCatalogScrape)
 	if err != nil {
-		return indexPage{}, err
+		return catalog{}, err
 	}
 	if !modified {
-		return b.prevFirstPage, nil
+		return b.prevCatalog, nil
 	}
 	return page, nil
 }
