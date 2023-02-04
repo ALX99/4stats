@@ -224,7 +224,7 @@
           },
           "editorMode": "builder",
           "expr": "sum by(job) (fourchan_posts_total)",
-          "legendFormat": "PPM",
+          "legendFormat": "Posts",
           "range": true,
           "refId": "A"
         }
