@@ -1,11 +1,11 @@
 package metrics
 
 import (
-	"log"
 	"net/http"
 
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
+	"github.com/rs/zerolog/log"
 )
 
 type Server struct {
@@ -60,7 +60,7 @@ func (s *Server) Start() error {
 	go func() {
 		err := s.server.ListenAndServe()
 		if err != nil && err != http.ErrServerClosed {
-			log.Fatalln(err)
+			log.Err(err).Msg("Could not start metrics server")
 		}
 	}()
 	return nil
@@ -69,7 +69,7 @@ func (s *Server) Start() error {
 func (s *Server) SetPPM(board string, v float64) {
 	gauge, err := s.ppm.GetMetricWithLabelValues(board)
 	if err != nil {
-		log.Println(err)
+		log.Err(err).Msg("Could not increment PPM metric")
 	}
 	gauge.Set(v)
 }
@@ -77,7 +77,7 @@ func (s *Server) SetPPM(board string, v float64) {
 func (s *Server) SetPostCount(board string, v float64) {
 	gauge, err := s.posts.GetMetricWithLabelValues(board)
 	if err != nil {
-		log.Println(err)
+		log.Err(err).Msg("Could not increment Posts metric")
 	}
 	gauge.Set(v)
 }
