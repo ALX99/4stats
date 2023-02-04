@@ -62,7 +62,7 @@ type catalog []struct {
 }
 
 func getCatalog(ctx context.Context, client *http.Client, board string, ifModifiedSince time.Time) (c catalog, contentModified bool, err error) {
-	url, err := url.JoinPath("https://a.4cdn.org", board, "catalog.json")
+	url, err := url.JoinPath("http://a.4cdn.org", board, "catalog.json")
 	if err != nil {
 		return catalog{}, false, err
 	}

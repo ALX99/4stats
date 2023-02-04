@@ -155,7 +155,7 @@ type Boards struct {
 }
 
 func GetBoards() (b Boards, err error) {
-	resp, err := http.Get("https://a.4cdn.org/boards.json")
+	resp, err := http.Get("http://a.4cdn.org/boards.json")
 	if err != nil {
 		return Boards{}, err
 	}

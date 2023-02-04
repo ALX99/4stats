@@ -80,7 +80,7 @@ func (b *Board) calculatePPM(ctx context.Context) (float64, error) {
 }
 
 func (b *Board) getThreadList() (threadList, error) {
-	url, err := url.JoinPath("https://a.4cdn.org", b.name, "threads.json")
+	url, err := url.JoinPath("http://a.4cdn.org", b.name, "threads.json")
 	if err != nil {
 		return threadList{}, err
 	}
