@@ -69,7 +69,7 @@ func (s *Server) Start() error {
 func (s *Server) SetPPM(board string, v float64) {
 	gauge, err := s.ppm.GetMetricWithLabelValues(board)
 	if err != nil {
-		log.Err(err).Msg("Could not increment PPM metric")
+		log.Err(err).Msg("Could not set PPM metric")
 	}
 	gauge.Set(v)
 }
@@ -77,7 +77,7 @@ func (s *Server) SetPPM(board string, v float64) {
 func (s *Server) SetPostCount(board string, v float64) {
 	gauge, err := s.posts.GetMetricWithLabelValues(board)
 	if err != nil {
-		log.Err(err).Msg("Could not increment Posts metric")
+		log.Err(err).Msg("Could not set Posts metric")
 	}
 	gauge.Set(v)
 }
