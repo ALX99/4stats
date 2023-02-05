@@ -26,3 +26,16 @@ func getTotalPostCount(c catalog) int64 {
 	}
 	return count
 }
+
+func getTotalImageCount(c catalog) int {
+	count := 0
+	for _, page := range c {
+		for _, thread := range page.Threads {
+			if thread.Ext != "" {
+				count++ // Thread has an image
+			}
+			count += thread.Images
+		}
+	}
+	return count
+}

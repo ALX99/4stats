@@ -12,8 +12,9 @@ type Server struct {
 	server *http.Server
 
 	// metrics
-	ppm   *prometheus.GaugeVec
-	posts *prometheus.GaugeVec
+	ppm        *prometheus.GaugeVec
+	posts      *prometheus.GaugeVec
+	imageCount *prometheus.GaugeVec
 }
 
 func New() *Server {
@@ -49,11 +50,25 @@ func (s *Server) InitializeMetrics() error {
 		labels,
 	)
 
+	s.imageCount = prometheus.NewGaugeVec(
+		prometheus.GaugeOpts{
+			Namespace: "fourchan",
+			Subsystem: "images",
+			Name:      "total",
+			Help:      "Total number of images",
+		},
+		labels,
+	)
+
 	if err := prometheus.Register(s.ppm); err != nil {
 		return err
 	}
 
-	return prometheus.Register(s.posts)
+	if err := prometheus.Register(s.posts); err != nil {
+		return err
+	}
+
+	return prometheus.Register(s.imageCount)
 }
 
 func (s *Server) Start() error {
@@ -78,6 +93,14 @@ func (s *Server) SetPostCount(board string, v float64) {
 	gauge, err := s.posts.GetMetricWithLabelValues(board)
 	if err != nil {
 		log.Err(err).Msg("Could not set Posts metric")
+	}
+	gauge.Set(v)
+}
+
+func (s *Server) SetImageCount(board string, v float64) {
+	gauge, err := s.imageCount.GetMetricWithLabelValues(board)
+	if err != nil {
+		log.Err(err).Msg("Could not set Images metric")
 	}
 	gauge.Set(v)
 }

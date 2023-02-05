@@ -55,6 +55,7 @@ func (b *Board) Update(ctx context.Context) error {
 	}
 
 	b.m.SetPostCount(b.name, float64(getTotalPostCount(b.prevCatalog)))
+	b.m.SetImageCount(b.name, float64(getTotalImageCount(b.prevCatalog)))
 
 	return nil
 }
