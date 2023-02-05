@@ -2,10 +2,7 @@ package board
 
 import (
 	"context"
-	"encoding/json"
-	"io"
 	"net/http"
-	"net/url"
 	"time"
 
 	"github.com/alx99/4stats/internal/4stats/catalog"
@@ -19,15 +16,6 @@ type Board struct {
 
 	m      metrics.Metrics
 	client http.Client
-}
-
-type threadList []struct {
-	Page    int `json:"page"`
-	Threads []struct {
-		No           int `json:"no"`
-		LastModified int `json:"last_modified"`
-		Replies      int `json:"replies"`
-	} `json:"threads"`
 }
 
 func New(name string, m metrics.Metrics) Board {
@@ -62,37 +50,6 @@ func (b *Board) Update(ctx context.Context) error {
 	b.m.SetImageCount(b.name, float64(b.catalog.GetImageCount()))
 
 	return nil
-}
-
-func (b *Board) getThreadList() (threadList, error) {
-	url, err := url.JoinPath("http://a.4cdn.org", b.name, "threads.json")
-	if err != nil {
-		return threadList{}, err
-	}
-
-	r, err := http.NewRequest(http.MethodGet, url, nil)
-	if err != nil {
-		return threadList{}, err
-	}
-
-	resp, err := b.client.Do(r)
-	if err != nil {
-		return threadList{}, err
-	}
-	defer resp.Body.Close()
-
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return threadList{}, err
-	}
-	resp.Body.Close()
-
-	tList := threadList{}
-	if err = json.Unmarshal(body, &tList); err != nil {
-		return threadList{}, err
-	}
-
-	return tList, nil
 }
 
 func (b *Board) Name() string {
