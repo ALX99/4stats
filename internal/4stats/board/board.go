@@ -8,14 +8,14 @@ import (
 	"net/url"
 	"time"
 
+	"github.com/alx99/4stats/internal/4stats/catalog"
 	"github.com/alx99/4stats/internal/4stats/metrics"
 )
 
 type Board struct {
 	name string
 
-	prevCatalog       catalog
-	prevCatalogScrape time.Time
+	catalog *catalog.Catalog
 
 	m      metrics.Metrics
 	client http.Client
@@ -43,44 +43,25 @@ func New(name string, m metrics.Metrics) Board {
 
 // Update this board's metrics
 func (b *Board) Update(ctx context.Context) error {
-	ppm, err := b.calculatePPM(ctx)
-	if err != nil {
+	if b.catalog == nil {
+		catalog, err := catalog.GetCatalog(ctx, b.client, b.name)
+		if err != nil {
+			return err
+		}
+		b.catalog = &catalog
+	} else if err := b.catalog.Update(ctx, b.client); err != nil {
 		return err
 	}
 
 	// todo /vg/ not working due to last_replies not
 	// being populated
 	if b.name != "vg" {
-		b.m.SetPPM(b.name, ppm)
+		b.m.SetPPM(b.name, b.catalog.GetPPM())
 	}
-
-	b.m.SetPostCount(b.name, float64(getTotalPostCount(b.prevCatalog)))
-	b.m.SetImageCount(b.name, float64(getTotalImageCount(b.prevCatalog)))
+	b.m.SetPostCount(b.name, float64(b.catalog.GetPostCount()))
+	b.m.SetImageCount(b.name, float64(b.catalog.GetImageCount()))
 
 	return nil
-}
-
-func (b *Board) calculatePPM(ctx context.Context) (float64, error) {
-	// save last valuse
-	prevScrape := b.prevCatalogScrape
-	prevCatalog := b.prevCatalog
-
-	c, err := b.getCatalog(ctx)
-	if err != nil {
-		return 0, err
-	}
-
-	// save new ones
-	b.prevCatalogScrape = time.Now()
-	b.prevCatalog = c
-
-	if prevScrape.IsZero() {
-		return 0, nil // first scrape nothing to calculate
-	}
-
-	newPostsCount := getHighestPostNo(c) - getHighestPostNo(prevCatalog)
-
-	return (float64(newPostsCount) / time.Since(prevScrape).Seconds()) * 60, nil
 }
 
 func (b *Board) getThreadList() (threadList, error) {
@@ -112,17 +93,6 @@ func (b *Board) getThreadList() (threadList, error) {
 	}
 
 	return tList, nil
-}
-
-func (b *Board) getCatalog(ctx context.Context) (catalog, error) {
-	page, modified, err := getCatalog(ctx, &b.client, b.name, b.prevCatalogScrape)
-	if err != nil {
-		return catalog{}, err
-	}
-	if !modified {
-		return b.prevCatalog, nil
-	}
-	return page, nil
 }
 
 func (b *Board) Name() string {
