@@ -4,11 +4,17 @@ includes:
   common:
     taskfile: ./task/Taskfile.yml
     internal: true
+    aliases:
+      - c
 
 tasks:
   clean:
     - rm -rf ./build
     - docker-compose down -v
+
+  lint:
+    cmds:
+      - task: c:lint:go
 
   build:
     sources:
@@ -23,9 +29,9 @@ tasks:
   image:
     deps: [build]
     cmds:
-      - task: common:docker-build
+      - task: c:docker:build
         vars:
-          DOCKER_IMAGE: alx99/4stats:latest
+          IMAGE_NAME: alx99/4stats:latest
 
   image-push:
     deps: [image]

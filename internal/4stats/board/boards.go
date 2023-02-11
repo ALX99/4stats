@@ -123,34 +123,7 @@ type Boards struct {
 		} `json:"board_flags,omitempty"`
 		TextOnly       int `json:"text_only,omitempty"`
 		RequireSubject int `json:"require_subject,omitempty"`
-		BoardFlags0    struct {
-			Ac string `json:"AC"`
-			An string `json:"AN"`
-			Bl string `json:"BL"`
-			Cf string `json:"CF"`
-			Cm string `json:"CM"`
-			Ct string `json:"CT"`
-			Dm string `json:"DM"`
-			Eu string `json:"EU"`
-			Fc string `json:"FC"`
-			Gn string `json:"GN"`
-			Gy string `json:"GY"`
-			Jh string `json:"JH"`
-			Kn string `json:"KN"`
-			Mf string `json:"MF"`
-			Nb string `json:"NB"`
-			Nt string `json:"NT"`
-			Nz string `json:"NZ"`
-			Pc string `json:"PC"`
-			Pr string `json:"PR"`
-			Re string `json:"RE"`
-			Mz string `json:"MZ"`
-			Tm string `json:"TM"`
-			Tr string `json:"TR"`
-			Un string `json:"UN"`
-			Wp string `json:"WP"`
-		} `json:"board_flags,omitempty"`
-		MathTags int `json:"math_tags,omitempty"`
+		MathTags       int `json:"math_tags,omitempty"`
 	} `json:"boards"`
 }
 
